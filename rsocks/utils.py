@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 
 from six.moves.urllib.parse import urlparse, parse_qsl
