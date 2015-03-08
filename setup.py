@@ -10,7 +10,7 @@ setup(
     version='0.1.0.dev',
     author='Jiangge Zhang',
     author_email='tonyseek@gmail.com',
-    description='A SOCKS 4/5 reserve proxy server.',
+    description='A SOCKS 4/5 reserve proxy server',
     long_description=long_description,
     url='https://github.com/tonyseek/rsocks',
     license='MIT',
@@ -26,4 +26,9 @@ setup(
     ],
     packages=find_packages(),
     platforms=['Any'],
+    install_requires=[
+        'PySocks>=1.5',
+        'eventlet>=0.17',
+        'six',
+    ],
 )
