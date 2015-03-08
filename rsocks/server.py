@@ -5,8 +5,10 @@ import logging
 
 import eventlet
 from eventlet.green import socket, ssl
-# from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urlparse, parse_qsl
 
+
+socks = eventlet.import_patched('socks')
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG if 'DEBUG' in os.environ else logging.INFO)
@@ -70,6 +72,12 @@ class ReverseProxyServer(Server):
         self.upstream_sock = None
         self.use_ssl = use_ssl
         self.chunk_size = chunk_size
+        self.proxy_server = None
+
+    def set_proxy(self, uri):
+        uri = urlparse(uri)
+        self.proxy_server = parse_proxy_uri(uri)
+        self.logger.info('Using proxy server %s' % uri.geturl())
 
     def handle_accept(self, sock, address):
         if self.upstream_sock:
@@ -83,10 +91,17 @@ class ReverseProxyServer(Server):
             else:
                 self.logger.info('Disconnected from %s:%d' % self.upstream)
 
-        self.upstream_sock = socket.socket()
-        if self.use_ssl:
-            self.upstream_sock = ssl.SSLSocket(self.upstream_sock)
-        self.upstream_sock.connect(self.upstream)
+        if self.proxy_server:
+            self.upstream_sock = socks.socksocket()
+            self.upstream_sock.set_proxy(**self.proxy_server)
+            self.upstream_sock.connect(self.upstream)
+            if self.use_ssl:
+                self.upstream_sock = ssl.SSLSocket(self.upstream_sock)
+        else:
+            self.upstream_sock = socket.socket()
+            if self.use_ssl:
+                self.upstream_sock = ssl.SSLSocket(self.upstream_sock)
+            self.upstream_sock.connect(self.upstream)
 
         super(ReverseProxyServer, self).handle_accept(sock, address)
         self.logger.info('Connected to upstream %s:%d' % self.upstream)
@@ -105,3 +120,25 @@ class ReverseProxyServer(Server):
                 break
             self.logger.debug('%s %r' % (label, data))
             dst.sendall(data)
+
+
+def parse_proxy_uri(uri):
+    proxy_options = dict(parse_qsl(uri.query))
+    proxy_type = {
+        'SOCKS4': socks.PROXY_TYPE_SOCKS4,
+        'SOCKS5': socks.PROXY_TYPE_SOCKS5,
+    }.get(uri.scheme.upper())
+
+    if not proxy_type:
+        raise ValueError('%r is not supported proxy protocol' % uri.scheme)
+    if not uri.hostname:
+        raise ValueError('hostname is required')
+
+    return {
+        'proxy_type': proxy_type,
+        'addr': uri.hostname,
+        'port': uri.port or 1080,
+        'rdns': proxy_options.get('rdns', True),
+        'username': uri.username,
+        'password': uri.password,
+    }
