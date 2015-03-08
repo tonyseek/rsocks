@@ -1,17 +1,15 @@
 from __future__ import unicode_literals
 
-import os
 import logging
 
-import eventlet
-from eventlet.green import socket, ssl
-from six.moves.urllib.parse import urlparse, parse_qsl
+from .eventlib import socket, ssl, socks, GreenPool, listen
+from .utils import parse_proxy_uri, printable_uri, debug
 
 
-socks = eventlet.import_patched('socks')
+__all__ = ['ReverseProxyServer']
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if 'DEBUG' in os.environ else logging.INFO)
+logger.setLevel(logging.DEBUG if debug() else logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 
@@ -19,7 +17,7 @@ class Server(object):
     """The template class for writting custom server."""
 
     def __init__(self):
-        self.pool = eventlet.GreenPool()
+        self.pool = GreenPool()
         self.logger = logger.getChild(self.__class__.__name__)
         self.server = None
 
@@ -28,7 +26,7 @@ class Server(object):
 
         :param address: The ``('127.0.0.1', 2222)`` liked tuple.
         """
-        self.server = eventlet.listen(address)
+        self.server = listen(address)
         self.logger.info('Listening %s:%d' % address)
 
     def loop(self):
@@ -75,9 +73,8 @@ class ReverseProxyServer(Server):
         self.proxy_server = None
 
     def set_proxy(self, uri):
-        uri = urlparse(uri)
         self.proxy_server = parse_proxy_uri(uri)
-        self.logger.info('Using proxy server %s' % uri.geturl())
+        self.logger.info('Using proxy server %s' % printable_uri(uri))
 
     def handle_accept(self, sock, address):
         if self.upstream_sock:
@@ -85,7 +82,7 @@ class ReverseProxyServer(Server):
                 self.upstream_sock.shutdown(socket.SHUT_RDWR)
             except socket.error as e:
                 if e.args[0] == 57:  # 57 - socket is not connected
-                    self.logger.info('Disconnected from %s:%d' % self.upstream)
+                    self.logger.info('Closed %s:%d' % self.upstream)
                 else:
                     raise
             else:
@@ -120,25 +117,3 @@ class ReverseProxyServer(Server):
                 break
             self.logger.debug('%s %r' % (label, data))
             dst.sendall(data)
-
-
-def parse_proxy_uri(uri):
-    proxy_options = dict(parse_qsl(uri.query))
-    proxy_type = {
-        'SOCKS4': socks.PROXY_TYPE_SOCKS4,
-        'SOCKS5': socks.PROXY_TYPE_SOCKS5,
-    }.get(uri.scheme.upper())
-
-    if not proxy_type:
-        raise ValueError('%r is not supported proxy protocol' % uri.scheme)
-    if not uri.hostname:
-        raise ValueError('hostname is required')
-
-    return {
-        'proxy_type': proxy_type,
-        'addr': uri.hostname,
-        'port': uri.port or 1080,
-        'rdns': proxy_options.get('rdns', True),
-        'username': uri.username,
-        'password': uri.password,
-    }
