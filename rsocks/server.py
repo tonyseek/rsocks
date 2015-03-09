@@ -1,16 +1,10 @@
 from __future__ import unicode_literals
 
-import logging
-
 from .eventlib import socket, ssl, socks, GreenPool, listen
-from .utils import parse_proxy_uri, printable_uri, debug
+from .utils import parse_proxy_uri, printable_uri, get_logger
 
 
 __all__ = ['ReverseProxyServer']
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if debug() else logging.INFO)
-logger.addHandler(logging.StreamHandler())
 
 
 class Server(object):
@@ -18,7 +12,7 @@ class Server(object):
 
     def __init__(self):
         self.pool = GreenPool()
-        self.logger = logger.getChild(self.__class__.__name__)
+        self.logger = get_logger().getChild('servers')
         self.server = None
 
     def listen(self, address):

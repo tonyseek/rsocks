@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import os
+import logging
 
 from six.moves.urllib.parse import urlparse, parse_qsl
 from .eventlib import socks
@@ -57,3 +58,16 @@ def debug(default=None):
     if os.environ['DEBUG'].strip().lower() in ('0', 'false', 'off'):
         return False
     return default
+
+
+def get_logger():
+    logger = logging.getLogger('rsocks')
+    if not logger.handlers:
+        logger_formatter = logging.Formatter(
+            '[%(asctime)s] %(name)-25s %(message)s',
+            '%H:%M:%S')
+        logger_handler = logging.StreamHandler()
+        logger_handler.setFormatter(logger_formatter)
+        logger.addHandler(logger_handler)
+        logger.setLevel(logging.DEBUG if debug() else logging.INFO)
+    return logger
