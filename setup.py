@@ -29,6 +29,13 @@ setup(
     install_requires=[
         'PySocks>=1.5',
         'eventlet>=0.17',
+        'click>=3.3',
+        'toml.py>=0.1',
         'six',
     ],
+    entry_points={
+        'console_scripts': [
+            'rsocks=rsocks.cli:main',
+        ],
+    },
 )
