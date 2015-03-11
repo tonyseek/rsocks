@@ -1,7 +1,7 @@
 RSOCKS
 ======
 
-RSOCKS is a reserve proxy server for transferring traffic of specific host
+RSOCKS is a reverse proxy server for transferring traffic of a specific host
 through a SOCKS 4/5 proxy. It is useful for using SOCKS 4/5 in applications
 that don't have SOCKS proxy support.
 
@@ -70,7 +70,7 @@ server option to local forwarding address::
 Now the application's traffic will be forwarded through the proxy server
 (``socks5://127.0.0.1:1080``).
 
-If you wish to run the rsocks server in background, please check the
+If you wish to run the rsocks server in the background, please check the
 `examples <https://github.com/tonyseek/rsocks/tree/master/examples>`_
 directory. OS X users can copy the ``com.tonyseek.rsocks.plist`` file to
 ``~/Library/LaunchAgents`` and load it as a service::
