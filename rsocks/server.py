@@ -69,6 +69,10 @@ class ReverseProxyServer(Server):
             self.logger.warning('proxy error: %r' % e)
             client_sock.shutdown(socket.SHUT_RDWR)
             return
+        except socket.error as e:
+            self.logger.warning('socket error: %r' % e)
+            client_sock.shutdown(socket.SHUT_RDWR)
+            return
 
         spawn_n(self._forward, client_sock.dup(), upstream_sock, 'Sending')
         spawn_n(self._forward, upstream_sock, client_sock.dup(), 'Received')
