@@ -10,6 +10,10 @@
         <string>--config</string>
         <string>/path/to/rsocks-config.toml</string>
     </array>
+    <key>StandardOutPath</key>
+    <string>/Users/YOUR_NAME/Library/Logs/rsocks.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/YOUR_NAME/Library/Logs/rsocks.errors.log</string>
     <key>KeepAlive</key>
     <true/>
     <key>RunAtLoad</key>
