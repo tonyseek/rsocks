@@ -10,7 +10,7 @@ setup(
     version='0.1.0',
     author='Jiangge Zhang',
     author_email='tonyseek@gmail.com',
-    description='A SOCKS reserve proxy server.',
+    description='A SOCKS reverse proxy server.',
     long_description=long_description,
     url='https://github.com/tonyseek/rsocks',
     license='MIT',

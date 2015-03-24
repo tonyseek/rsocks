@@ -1,0 +1,12 @@
+[Unit]
+Description=A SOCKS reverse proxy server
+After=network.target
+
+[Service]
+User=nobody
+Group=nobody
+WorkingDirectory=/opt/rsocks
+ExecStart=/opt/rsocks/bin/rsocks --config=/etc/rsocks/config.toml
+
+[Install]
+WantedBy=multi-user.target
