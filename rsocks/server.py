@@ -68,14 +68,18 @@ class ReverseProxyServer(Server):
         except (socks.GeneralProxyError, socks.ProxyConnectionError) as e:
             self.logger.warning('proxy error: %r' % e)
             client_sock.shutdown(socket.SHUT_RDWR)
-            return
+            client_sock.close()
         except socket.error as e:
             self.logger.warning('socket error: %r' % e)
             client_sock.shutdown(socket.SHUT_RDWR)
-            return
-
-        spawn_n(self._forward, client_sock.dup(), upstream_sock, 'Sending')
-        spawn_n(self._forward, upstream_sock, client_sock.dup(), 'Received')
+            client_sock.close()
+        except:
+            client_sock.shutdown(socket.SHUT_RDWR)
+            client_sock.close()
+            raise
+        else:
+            spawn_n(self._forward, client_sock.dup(), upstream_sock, 'W')
+            spawn_n(self._forward, upstream_sock, client_sock.dup(), 'R')
 
     def _connect_to_upstream(self):
         if self.proxy_server:
@@ -92,10 +96,15 @@ class ReverseProxyServer(Server):
         return upstream_sock
 
     def _forward(self, src, dst, label):
-        while True:
-            data = src.recv(self.chunk_size)
-            if not data:
-                self.logger.debug('%s EOF' % label)
-                return
-            self.logger.debug('%s %r bytes' % (label, len(data)))
-            dst.sendall(data)
+        try:
+            while True:
+                data = src.recv(self.chunk_size)
+                if not data:
+                    self.logger.debug('%s EOF' % label)
+                    return
+                self.logger.debug('%s %r bytes' % (label, len(data)))
+                dst.sendall(data)
+        except:
+            src.close()
+            dst.close()
+            raise
