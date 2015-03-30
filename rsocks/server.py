@@ -40,6 +40,10 @@ class Server(object):
 
     def handle_incoming(self, client_sock, client_addr):
         self.logger.info('Connection from %s:%d' % client_addr)
+        self.do_handle_incoming(client_sock, client_addr)
+
+    def do_handle_incoming(self, client_sock, client_addr):
+        raise NotImplementedError
 
 
 class ReverseProxyServer(Server):
@@ -59,12 +63,9 @@ class ReverseProxyServer(Server):
         self.proxy_server = parse_proxy_uri(uri)
         self.logger.info('Using proxy server %s' % printable_uri(uri))
 
-    def handle_incoming(self, client_sock, client_addr):
-        super(ReverseProxyServer, self).handle_incoming(
-            client_sock, client_addr)
-
+    def do_handle_incoming(self, client_sock, client_addr):
         try:
-            upstream_sock = self._connect_to_upstream()
+            upstream_sock = self.do_connect_to_upstream()
         except (socks.GeneralProxyError, socks.ProxyConnectionError) as e:
             self.logger.warning('proxy error: %r' % e)
             client_sock.shutdown(socket.SHUT_RDWR)
@@ -78,33 +79,40 @@ class ReverseProxyServer(Server):
             client_sock.close()
             raise
         else:
-            spawn_n(self._forward, client_sock.dup(), upstream_sock, 'W')
-            spawn_n(self._forward, upstream_sock, client_sock.dup(), 'R')
+            spawn_n(self.do_forward, client_sock.dup(), upstream_sock, 'w')
+            spawn_n(self.do_forward, upstream_sock, client_sock.dup(), 'r')
+            client_sock.close()
 
-    def _connect_to_upstream(self):
+    def do_connect_to_upstream(self):
         if self.proxy_server:
             upstream_sock = socks.socksocket()
             upstream_sock.set_proxy(**self.proxy_server)
         else:
             upstream_sock = socket.socket()
 
-        upstream_sock.connect(self.upstream)
-        if self.use_ssl:
-            upstream_sock = wrap_ssl(upstream_sock)
+        try:
+            upstream_sock.connect(self.upstream)
+            if self.use_ssl:
+                upstream_sock = wrap_ssl(upstream_sock)
+        except:
+            upstream_sock.shutdown(socket.SHUT_RDWR)
+            upstream_sock.close()
+            raise
+        else:
+            self.logger.info('Connected to upstream %s:%d' % self.upstream)
+            return upstream_sock
 
-        self.logger.info('Connected to upstream %s:%d' % self.upstream)
-        return upstream_sock
-
-    def _forward(self, src, dst, label):
+    def do_forward(self, src, dst, direction):
         try:
             while True:
                 data = src.recv(self.chunk_size)
                 if not data:
-                    self.logger.debug('%s EOF' % label)
+                    self.logger.debug('%s EOF' % direction)
                     return
-                self.logger.debug('%s %r bytes' % (label, len(data)))
+                self.logger.debug('%s %r bytes' % (direction, len(data)))
                 dst.sendall(data)
-        except:
-            src.close()
-            dst.close()
-            raise
+        finally:
+            if direction == 'w':
+                src.close()
+            if direction == 'r':
+                dst.close()
