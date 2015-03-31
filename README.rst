@@ -85,21 +85,22 @@ server option to local forwarding address::
 Now the application's traffic will be forwarded through the proxy server
 (``socks5://127.0.0.1:1080``).
 
-If you wish to run the rsocks server in the background, please check the
-`examples <https://github.com/tonyseek/rsocks/tree/master/examples>`_
-directory. OS X users can copy the ``com.tonyseek.rsocks.plist`` file to
+If you wish to run the rsocks server in background, please check the
+`Platform Service Templates <https://github.com/tonyseek/rsocks/tree/master/misc/platforms>`_.
+For example, OS X users can create ``com.tonyseek.rsocks.plist`` file in
 ``~/Library/LaunchAgents`` and load it as a service::
 
-    $ touch $HOME/.rsocks.toml
-    $ nano $HOME/.rsocks.toml  # edit the config file
-    $ wget http://git.io/pG4D -O ~/Library/LaunchAgents/com.tonyseek.rsocks.plist
-    $ nano ~/Library/LaunchAgents/com.tonyseek.rsocks.plist  # edit the plist
+    $ nano ~/.rsocks.toml  # create a config file
+    $ wget https://github.com/tonyseek/rsocks/blob/master/misc/platforms/osx-launchd/com.tonyseek.rsocks.plist \
+          -O ~/Library/LaunchAgents/com.tonyseek.rsocks.plist
+    $ nano ~/Library/LaunchAgents/com.tonyseek.rsocks.plist  # edit the template
     $ launchctl load -w ~/Library/LaunchAgents/com.tonyseek.rsocks.plist
+
 
 API Overview
 ------------
 
-The example for API using is simple:
+There is an example for using API to build a server:
 
 .. code-block:: python
 
