@@ -79,6 +79,7 @@ class ReverseProxyServer(Server):
             client_sock.close()
             raise
         else:
+            upstream_sock.refcount = 2  # two green processes use it
             spawn_n(self.do_forward, client_sock.dup(), upstream_sock, 'w')
             spawn_n(self.do_forward, upstream_sock, client_sock.dup(), 'r')
             client_sock.close()
@@ -103,6 +104,9 @@ class ReverseProxyServer(Server):
             return upstream_sock
 
     def do_forward(self, src, dst, direction):
+        if direction not in ('w', 'r'):
+            raise ValueError('invalid direction: %r' % direction)
+
         try:
             while True:
                 data = src.recv(self.chunk_size)
@@ -112,7 +116,24 @@ class ReverseProxyServer(Server):
                 self.logger.debug('%s %r bytes' % (direction, len(data)))
                 dst.sendall(data)
         finally:
+            # closes duplicated client socket
             if direction == 'w':
                 src.close()
             if direction == 'r':
                 dst.close()
+
+            # closes ununsed sockets according to theirs reference count
+            if direction == 'w':
+                release_rsocket(dst)
+            if direction == 'r':
+                release_rsocket(src)
+
+
+def release_rsocket(sock):
+    """Releases the reference of a referencable socket.
+
+    :param sock: the socket object which has the ``refcount`` attribute.
+    """
+    sock.refcount -= 1
+    if sock <= 0:
+        sock.close()
