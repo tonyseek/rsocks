@@ -5,6 +5,7 @@ RSOCKS is a reverse proxy server for transferring traffic of a specific host
 through a SOCKS 4/5 proxy. It is useful for using SOCKS 4/5 in applications
 that don't have SOCKS proxy support.
 
+
 Installation
 ------------
 
@@ -17,6 +18,20 @@ Or
 ::
 
     $ easy_install rsocks
+
+
+To upgrade to latest version, you could execute::
+
+    $ pip install -U rsocks
+
+
+Resources
+---------
+
+- `OS Service Templates <https://github.com/tonyseek/rsocks/tree/master/misc/platforms>`_
+- `Configuration Snippets <https://github.com/tonyseek/rsocks/tree/master/misc/snippets/configuration>`_
+- `Software Integration Guides <https://github.com/tonyseek/rsocks/wiki>`_
+
 
 Usage
 -----
@@ -81,8 +96,8 @@ directory. OS X users can copy the ``com.tonyseek.rsocks.plist`` file to
     $ nano ~/Library/LaunchAgents/com.tonyseek.rsocks.plist  # edit the plist
     $ launchctl load -w ~/Library/LaunchAgents/com.tonyseek.rsocks.plist
 
-Using API
----------
+API Overview
+------------
 
 The example for API using is simple:
 
