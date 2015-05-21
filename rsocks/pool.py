@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import contextlib
 
-from .eventlib import GreenPool
+from .green import GreenPool
 from .utils import get_logger
 
 
@@ -26,7 +26,7 @@ class ServerPool(object):
     def loop(self):
         for name, server in self.servers.items():
             self.logger.info('Prepared "%s"' % name)
-            self.pool.spawn(server.loop)
+            self.pool.spawn_n(server.loop)
         try:
             self.pool.waitall()
         except (SystemExit, KeyboardInterrupt):

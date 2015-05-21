@@ -5,6 +5,7 @@ import sys
 import logging
 
 from six.moves.urllib.parse import urlparse, parse_qsl
+
 from .eventlib import socks
 
 
