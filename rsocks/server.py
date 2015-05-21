@@ -64,7 +64,7 @@ class ReverseProxyServer(Server):
 
         try:
             upstream_sock = self._connect_to_upstream()
-        except IOError as e:
+        except socket.error as e:
             self.logger.exception(e)
             return
 
@@ -110,7 +110,6 @@ class ReverseProxyServer(Server):
 def drop_socket(sock):
     try:
         sock.shutdown(socket.SHUT_RDWR)
-    except socket.error as e:
-        if e.args[0] != 57:  # 57 - socket is not connected
-            raise
+    except socket.error:
+        pass
     sock.close()
