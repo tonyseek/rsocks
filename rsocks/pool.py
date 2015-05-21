@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import contextlib
 
-from .eventlib import GreenPool
+from .green import GreenPool
 from .utils import get_logger
 
 

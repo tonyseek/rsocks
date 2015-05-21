@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from .eventlib import socket, socks, listen, serve, wrap_ssl, GreenPool
+from .green import socket, socks, listen, serve, wrap_ssl, GreenPool
 from .utils import parse_proxy_uri, printable_uri, get_logger
 
 
