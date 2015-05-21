@@ -1,5 +1,6 @@
 [servers.imap]
 proxy = "socks5://localhost:1080"
+proxy_timeout = 15.0
 listen_port = 5993
 upstream_host = "imap.gmail.com"
 upstream_port = 993
@@ -7,6 +8,7 @@ upstream_ssl = true
 
 [servers.smtp]
 proxy = "socks5://localhost:1080"
+proxy_timeout = 15.0
 listen_port = 5465
 upstream_host = "smtp.gmail.com"
 upstream_port = 465

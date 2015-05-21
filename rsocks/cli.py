@@ -33,6 +33,7 @@ def main(context, config):
             listen_host = str(server_config.get('listen_host', '127.0.0.1'))
             listen_port = int(server_config.get('listen_port', default_port))
             proxy_uri = server_config.get('proxy')
+            proxy_timeout = server_config.get('proxy_timeout')
         except ValueError as e:
             click.secho('[servers.%s]: %s' % (name, e.args[0]), fg='red')
             context.abort()
@@ -43,7 +44,7 @@ def main(context, config):
                 upstream=(upstream_host, upstream_port),
                 use_ssl=upstream_ssl) as server:
             if proxy_uri:
-                server.set_proxy(proxy_uri)
+                server.set_proxy(proxy_uri, timeout=proxy_timeout)
             else:
                 click.secho(
                     'running [servers.%s] without any proxy server' % name,

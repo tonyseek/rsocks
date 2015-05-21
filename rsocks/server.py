@@ -54,8 +54,11 @@ class ReverseProxyServer(Server):
         self.use_ssl = use_ssl
         self.chunk_size = chunk_size
         self.proxy_server = None
+        self.proxy_timeout = 15.0
 
-    def set_proxy(self, uri):
+    def set_proxy(self, uri, timeout=None):
+        if timeout:
+            self.proxy_timeout = timeout
         self.proxy_server = parse_proxy_uri(uri)
         self.logger.info('Using proxy server %s' % printable_uri(uri))
 
@@ -84,6 +87,7 @@ class ReverseProxyServer(Server):
             upstream_sock = socket.socket()
 
         try:
+            upstream_sock.settimeout(self.proxy_timeout)
             upstream_sock.connect(self.upstream)
             if self.use_ssl:
                 upstream_sock = wrap_ssl(upstream_sock)
@@ -99,7 +103,12 @@ class ReverseProxyServer(Server):
         assert direction in ('w', 'r')
 
         while True:
-            data = src.recv(self.chunk_size)
+            try:
+                data = src.recv(self.chunk_size)
+            except socket.error as e:
+                if e.args and e.args[0] == 'timed out':
+                    self.logger.debug('%s TIMEOUT' % direction)
+                    return
             if not data:
                 self.logger.debug('%s EOF' % direction)
                 return
