@@ -67,7 +67,7 @@ class ReverseProxyServer(Server):
 
         try:
             upstream_sock = self._connect_to_upstream()
-        except socket.error as e:
+        except (socket.error, socks.ProxyError) as e:
             self.logger.exception(e)
             return
 
