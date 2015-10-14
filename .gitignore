@@ -58,3 +58,5 @@ docs/_build/
 target/
 
 .idea/
+.bumpversion.cfg
+.editorconfig

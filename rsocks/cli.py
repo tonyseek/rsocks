@@ -33,12 +33,10 @@ def main(context, config):
             click.secho('[servers.%s]: %s' % (name, e.args[0]), fg='red')
             context.abort()
 
-        default_port = upstream_port + 5000
-
         try:
             upstream_ssl = server_config.get('upstream_ssl', 0) == 1
             listen_host = str(server_config.get('listen_host', '127.0.0.1'))
-            listen_port = int(server_config.get('listen_port', default_port))
+            listen_port = server_config.getint('listen_port', upstream_port+5000)
             proxy_uri = server_config.get('proxy')
             proxy_timeout = server_config.get('proxy_timeout')
         except ValueError as e:
