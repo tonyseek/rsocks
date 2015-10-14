@@ -1,5 +1,10 @@
+
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
+
 import click
-import toml
 
 from rsocks.pool import ServerPool
 from rsocks.server import ReverseProxyServer
@@ -9,12 +14,14 @@ from rsocks.server import ReverseProxyServer
 @click.option('--config', type=click.File('r'), required=True)
 @click.pass_context
 def main(context, config):
-    config = toml.loads(config.read())
-    servers = config.get('servers', {})
+    config_ = ConfigParser()
+    config_.read_string(config.read())
 
     pool = ServerPool()
 
-    for name, server_config in servers.items():
+    for name, server_config in config_.items():
+        if name == 'DEFAULT':
+            continue
         try:
             upstream_host = str(server_config['upstream_host'])
             upstream_port = int(server_config['upstream_port'])
@@ -29,7 +36,7 @@ def main(context, config):
         default_port = upstream_port + 5000
 
         try:
-            upstream_ssl = bool(server_config.get('upstream_ssl', False))
+            upstream_ssl = server_config.get('upstream_ssl', 0) == 1
             listen_host = str(server_config.get('listen_host', '127.0.0.1'))
             listen_port = int(server_config.get('listen_port', default_port))
             proxy_uri = server_config.get('proxy')
@@ -52,3 +59,7 @@ def main(context, config):
             server.listen((listen_host, listen_port))
 
     pool.loop()
+
+
+if __name__ == '__main__':
+    main()

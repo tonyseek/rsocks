@@ -6,7 +6,7 @@ import logging
 
 from six.moves.urllib.parse import urlparse, parse_qsl
 
-from .eventlib import socks
+from .green import socks
 
 
 __all__ = ['parse_proxy_uri', 'printable_uri', 'debug']
