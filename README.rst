@@ -41,7 +41,7 @@ First, we need to create a config file with following format::
     # /path/to/rsocks.toml
     [servers.foo]
     proxy = "socks4://user:pass@192.168.1.10:1080"
-    listen_host = 0.0.0.0
+    listen_host = "0.0.0.0"
     listen_port = 5025
     upstream_host = "smtp.example.com"
     upstream_port = 25
