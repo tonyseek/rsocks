@@ -52,3 +52,6 @@ def main(context, config):
             server.listen((listen_host, listen_port))
 
     pool.loop()
+
+if __name__ == '__main__':
+    main()
