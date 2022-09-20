@@ -7,7 +7,7 @@ with open('README.rst') as readme:
 
 setup(
     name='rsocks',
-    version='0.3.3',
+    version='0.4.0',
     author='Jiangge Zhang',
     author_email='tonyseek@gmail.com',
     description='A SOCKS reverse proxy server.',
