@@ -7,7 +7,7 @@ with open('README.rst') as readme:
 
 setup(
     name='rsocks',
-    version='0.3.3',
+    version='0.4.0',
     author='Jiangge Zhang',
     author_email='tonyseek@gmail.com',
     description='A SOCKS reverse proxy server.',
@@ -22,13 +22,14 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     packages=find_packages(),
     platforms=['Any'],
     install_requires=[
-        'PySocks>=1.5,<1.6',
-        'eventlet>=0.17,<0.18',
+        'PySocks>=1.7.1,<1.8',
+        'eventlet>=0.31,<0.34',
         'click>=3.3,<3.4',
         'toml.py>=0.1,<0.2',
         'six',
