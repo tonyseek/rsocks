@@ -28,7 +28,7 @@ setup(
     platforms=['Any'],
     install_requires=[
         'PySocks>=1.5,<1.6',
-        'eventlet>=0.17,<0.18',
+        'eventlet>=0.31,<0.34',
         'click>=3.3,<3.4',
         'toml.py>=0.1,<0.2',
         'six',
